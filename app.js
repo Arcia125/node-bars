@@ -29,14 +29,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
+app.use(require(`./controllers`));
 
-app.get(`/auth/twitter`, passport.authenticate(`twitter`));
+// app.get(`/auth/twitter`, passport.authenticate(`twitter`));
 
-app.get(`/auth/twitter/callback`,
-    passport.authenticate(`twitter`, {
-        successRedirect: `/`,
-        failureRedirect: `/`,
-    }));
+// app.get(`/auth/twitter/callback`,
+//     passport.authenticate(`twitter`, {
+//         successRedirect: `/`,
+//         failureRedirect: `/`,
+//     }));
 
 db.connect(config.db.url, (err) => {
     if (err) {
@@ -47,3 +48,5 @@ db.connect(config.db.url, (err) => {
         });
     }
 });
+
+module.exports = app;
