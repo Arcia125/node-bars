@@ -11,7 +11,7 @@ const should = chai.should();
 chai.use(chaiHttp);
 
 describe(`App`, function () {
-    it(`Should respond with response code 300 at /`, function (done) {
+    it(`Should respond with response code 200 at /`, function (done) {
         chai.request(app)
         .get(`/`)
         .end(function (err, res) {
@@ -19,11 +19,12 @@ describe(`App`, function () {
             done();
         });
     });
-    it(`Should respond with response code 302 at /auth/twitter`, function (done) {
+    it(`Should respond with response code 200 at /auth/twitter`, function (done) {
         chai.request(app)
         .get(`/auth/twitter`)
         .end(function (err, res) {
-            res.should.have.status(302);
+            res.should.have.status(200);
+            done();
         });
     });
 });

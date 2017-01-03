@@ -5,7 +5,7 @@ const ObjectId = require(`mongodb`).ObjectID;
 
 const state = {
     db: null,
-***REMOVED***
+};
 
 module.exports.connect = (url, done) => {
     if (state.db) return done();
@@ -14,7 +14,7 @@ module.exports.connect = (url, done) => {
         state.db = db;
         done();
     });
-***REMOVED***
+};
 
 module.exports.get = () => state.db;
 
@@ -26,7 +26,7 @@ module.exports.close = (done) => {
             done(err);
         });
     }
-***REMOVED***
+};
 
 const oID = id => new ObjectId(id);
 
@@ -36,5 +36,5 @@ module.exports.findById = (id, collection, callback) => {
     collection.findOne({ "_id": oID(id) }, (err, doc) => {
         callback(err, doc);
     });
-***REMOVED***
+};
 

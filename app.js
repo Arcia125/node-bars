@@ -4,7 +4,7 @@ const express = require(`express`);
 const app = express();
 const request = require(`request`);
 
-const passport = require(`passport`);
+let passport = require(`passport`);
 const flash = require(`connect-flash`);
 
 const expressStatic = require(`express-static`);
@@ -14,6 +14,7 @@ const session = require(`express-session`);
 
 const config = require(`./config`);
 const db = require(`./db`);
+
 
 require(`./middlewares/pass`)(passport, db);
 
@@ -29,15 +30,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-app.use(require(`./controllers`));
-
-// app.get(`/auth/twitter`, passport.authenticate(`twitter`));
-
-// app.get(`/auth/twitter/callback`,
-//     passport.authenticate(`twitter`, {
-//         successRedirect: `/`,
-//         failureRedirect: `/`,
-//     }));
+const controllers = require(`./controllers`)(passport);
+app.use(controllers);
 
 db.connect(config.db.url, (err) => {
     if (err) {

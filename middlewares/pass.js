@@ -24,7 +24,7 @@ module.exports = function (passport, db) {
                         "twitterToken": token,
                         "twitterUsername": profile.username,
                         "twitterDisplayName": profile.displayName,
-                    ***REMOVED***
+                    };
                     users.findAndModify({
                         "twitterId": profile.id,
                     },
@@ -55,4 +55,4 @@ module.exports = function (passport, db) {
             done(err, user);
         });
     });
-***REMOVED***
+};
