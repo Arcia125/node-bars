@@ -4,7 +4,7 @@ const express = require(`express`);
 const app = express();
 const request = require(`request`);
 
-let passport = require(`passport`);
+const passport = require(`passport`);
 const flash = require(`connect-flash`);
 
 const expressStatic = require(`express-static`);
@@ -14,7 +14,9 @@ const session = require(`express-session`);
 
 const config = require(`./config`);
 const db = require(`./db`);
+const Yelp = require(`./utils/yelp`);
 
+const yelpApi = new Yelp({ clientId: config.yelp.c_key, clientSecret: config.yelp.c_secret });
 
 require(`./middlewares/pass`)(passport, db);
 
@@ -30,7 +32,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-const controllers = require(`./controllers`)(passport);
+const controllers = require(`./controllers`)(passport, yelpApi);
 app.use(controllers);
 
 db.connect(config.db.url, (err) => {
@@ -42,5 +44,8 @@ db.connect(config.db.url, (err) => {
         });
     }
 });
+
+
+
 
 module.exports = app;
