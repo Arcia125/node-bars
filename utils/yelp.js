@@ -8,31 +8,31 @@ const getParam = (paramKey, param, end) => {
     if (param) {
         return `${paramKey}=${param}${end ? '' : '&'}`;
     }
-    return '';
+    return ``;
 };
 
 class Yelp {
-    constructor({ clientId, clientSecret}) {
+    constructor({ clientId, clientSecret }) {
         this.endpoints = {};
         this.endpoints.base = `https://api.yelp.com/v3`;
         this.endpoints.search = `${this.endpoints.base}/businesses/search?`;
         const oauth2 = `https://api.yelp.com/oauth2/token`;
         const form = {
-            "grant_type": "client_credentials",
-            "client_id": clientId,
-            "client_secret": clientSecret
+            grant_type: `client_credentials`,
+            client_id: clientId,
+            client_secret: clientSecret,
         };
         const formData = querystring.stringify(form);
         const contentLength = formData.length;
         const headers = {
             "Content-Length": contentLength,
-            "Content-Type": `application/x-www-form-urlencoded`
+            "Content-Type": `application/x-www-form-urlencoded`,
         };
         request({
             method: `POST`,
             headers,
             uri: oauth2,
-            body: formData
+            body: formData,
         }, (error, response, body) => {
             if (error) {
                 console.log(error);
@@ -84,16 +84,16 @@ class Yelp {
                 getParam(`open_at`, openAt),
                 getParam(`attributes`, attributes),
             ];
-            searchParam = params.join('');
+            searchParam = params.join(``);
         }
-        let response = '';
+        console.assert(typeof this.token !== `undefined`);
         request({
             method: `GET`,
             uri: `${this.endpoints.search}${searchParam}`,
             headers: {
-                "Authorization": `Bearer ${this.token}`
-            }
-        }, function (error, res, body) {
+                Authorization: `Bearer ${this.token}`,
+            },
+        }, (error, res, body) => {
             if (error) {
                 console.log(error);
                 return;

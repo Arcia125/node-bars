@@ -1,13 +1,16 @@
 const express = require(`express`);
 const router = express.Router();
+const auth = require(`./auth`);
+const api = require(`./api`);
 
 module.exports = function (passport, yelpApi) {
     router.get(`/`, (req, res) => {
         res.send(`home`);
     });
 
-    router.use(`/auth`, require(`./auth`)(passport));
+    router.use(`/auth`, auth(passport));
 
-    router.use(`/api`, require(`./api`)(yelpApi));
+    router.use(`/api`, api(yelpApi));
+
     return router;
 };

@@ -2,7 +2,6 @@
 
 const express = require(`express`);
 const app = express();
-const request = require(`request`);
 
 const passport = require(`passport`);
 const flash = require(`connect-flash`);
@@ -44,8 +43,5 @@ db.connect(config.db.url, (err) => {
         });
     }
 });
-
-
-
 
 module.exports = app;
