@@ -5,7 +5,7 @@ const api = require(`./api`);
 
 module.exports = function (passport, yelpApi) {
     router.get(`/`, (req, res) => {
-        res.send(`home`);
+        res.render(`index`, { username: `me`, expressFlash: ``, polls: `` });
     });
 
     router.use(`/auth`, auth(passport));
