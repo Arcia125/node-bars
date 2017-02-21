@@ -7,13 +7,13 @@ const prod = process.argv.indexOf('-p') !== -1;
 
 
 const config = {
-	context: path.join(__dirname, '/views'),
+	context: path.join(__dirname, '/frontend'),
 	entry: {
 		main: './main.js'
 	},
 	output: {
 		filename: 'bundle.js',
-		path: path.join(__dirname, '/views'),
+		path: path.join(__dirname, '/public'),
 	},
 	module: {
 		loaders: [
@@ -28,7 +28,7 @@ const config = {
 			exclude: /node_modules/,
 			loader: 'babel',
 			query: {
-				presets: ['es2015']
+				presets: ['es2015', 'react']
 			}
 		},
 		{

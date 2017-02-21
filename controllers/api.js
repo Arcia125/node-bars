@@ -16,6 +16,10 @@ module.exports = function (yelpApi) {
     router.get(`/search/location/:location`, (req, res) => {
         const location = req.params.location;
         yelpApi.search({ location, categories: `bars` }, (body) => {
+            if (body.error) {
+                res.status(404).send(body.error);
+                return;
+            }
             res.send(body);
         });
     });
