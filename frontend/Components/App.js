@@ -22,6 +22,19 @@ class App extends Component {
         this.connect();
     }
 
+    connect() {
+        xhrRequest({ method: `GET`, url: `auth/user` })
+            .then((response) => {
+                const username = response.username;
+                this.setState({
+                    username,
+                });
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
+
     handleLocationSearch(location) {
         return new Promise((resolve, reject) => {
             xhrRequest({ method: `GET`, url: `/api/v1/search/location/${encodeURIComponent(location)}` })
@@ -46,54 +59,21 @@ class App extends Component {
         if (this.state.locationBars !== null) {
             const bars = this.state.locationBars.businesses;
             console.log(bars);
-            return bars.map((bar, barIndex) => {
-                return (
-                    <Bar key={ barIndex } barName={ bar.name }/>
-                );
-            });
+            return bars.map((bar, barIndex) => <Bar key={ barIndex } bar={ bar } delay={ barIndex } user={ this.state.username } />);
         }
         return null;
     }
 
-    connect() {
-        xhrRequest({ method: `GET`, url: `auth/user` })
-            .then((response) => {
-                const username = response.username;
-                this.setState({
-                    username,
-                });
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-        // const xhr = new XMLHttpRequest();
-        // xhr.open(`GET`, `auth/user`, true);
-        // xhr.onload = (event) => {
-        //     if (xhr.readyState === 4) {
-        //         if (xhr.status === 200) {
-        //             const username = JSON.parse(xhr.response).username || null;
-        //             this.setState({
-        //                 username,
-        //             });
-        //         } else {
-        //             console.error(xhr.statusText);
-        //         }
-
-        //     }
-        // };
-        // xhr.onerror = (event) => {
-        //     console.error(xhr.statusText);
-        // };
-        // xhr.send(null);
-    }
     render() {
         return (
             <div>
-                <Header username={ this.state.username }/>
-                <LocationSearch onSearch={ this.handleLocationSearch }/>
-                {
-                    this.renderBars()
-                }
+                <Header username={ this.state.username } />
+                <LocationSearch onSearch={ this.handleLocationSearch } />
+                <div style={ { marginRight: `20%`, marginLeft: `20%` } }>
+                    {
+                        this.renderBars()
+                    }
+                </div>
             </div>
         );
     }

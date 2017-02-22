@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import xhrRequest from '../utils/requests/xhrRequest';
+import storageIsAvailable from '../utils/localstore/storageIsAvailable';
 
 const debugEnabled = true;
 
@@ -14,27 +16,41 @@ class LocationSearch extends Component {
             query: ``,
             msg: { msg: ``, isError: false },
         };
+        this.storageKey = `locationSearch`;
+
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
     }
 
-    handleSubmit(event) {
-        event.preventDefault();
+    componentDidMount() {
+        if (storageIsAvailable()) {
+            const searchLocation = localStorage.getItem(this.storageKey);
+            this.searchLocation(searchLocation);
+            this.setState({
+                query: searchLocation,
+            });
+        }
+    }
+
+    searchLocation(searchLocation) {
         this.setState({
             msg: {
                 msg: `Searching...`,
                 isError: false,
             },
         });
-        this.props.onSearch(this.state.query)
+        this.props.onSearch(searchLocation)
             .then((response) => {
                 debug(response);
                 this.setState({
                     msg: {
                         msg: ``,
-                        isError: false
+                        isError: false,
                     },
                 });
+                if (storageIsAvailable()) {
+                    localStorage.setItem(this.storageKey, searchLocation);
+                }
             })
             .catch((err) => {
                 debug(err);
@@ -56,6 +72,12 @@ class LocationSearch extends Component {
             });
     }
 
+    handleSubmit(event) {
+        event.preventDefault();
+        this.searchInput.blur();
+        this.searchLocation(this.state.query);
+    }
+
     handleChange(event) {
         const query = event.target.value;
         this.setState({
@@ -69,12 +91,12 @@ class LocationSearch extends Component {
 
     render() {
         return (
-            <form onSubmit={ this.handleSubmit } className='row location-search'>
-                <div className='container text-center form-group col-xs-9'>
-                    <input value={ this.state.query } onChange={ this.handleChange } className='form-control' type='text' name='search'/>
+            <form style={ { position: `relative`, right: `6px` } } onSubmit={ this.handleSubmit } className='row location-search'>
+                <div style={ { paddingRight: `0` } } className='container text-center form-group col-xs-11'>
+                    <input ref={ (elem) => { this.searchInput = elem; } } value={ this.state.query } onChange={ this.handleChange } className='form-control' type='text' name='search'/>
                 </div>
-                <button className='btn btn-primary col-xs-3' type='submit'>
-                    Go
+                <button className='btn btn-primary col-xs-1' type='submit'>
+                    Search
                 </button>
                 <span
                     style={ { width: '100%', marginLeft: '20px', color: this.state.msg && this.state.msg.msg !== `` ? `` : `transparent` } }

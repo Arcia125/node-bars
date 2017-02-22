@@ -16,6 +16,7 @@ class Yelp {
         this.endpoints = {};
         this.endpoints.base = `https://api.yelp.com/v3`;
         this.endpoints.search = `${this.endpoints.base}/businesses/search?`;
+        this.endpoints.business = `${this.endpoints.base}/businesses/`;
         const oauth2 = `https://api.yelp.com/oauth2/token`;
         const form = {
             grant_type: `client_credentials`,
@@ -101,6 +102,25 @@ class Yelp {
             if (typeof callback === `function`) {
                 callback(JSON.parse(body));
             }
+        });
+    }
+
+    businessDetails({ yelpId }) {
+        return new Promise((resolve, reject) => {
+            request({
+                method: `GET`,
+                uri: `${this.endpoints.business}${yelpId}`,
+                headers: {
+                    Authorization: `Bearer ${this.token}`,
+                },
+            }, (error, res, body) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                    return;
+                }
+                resolve(JSON.parse(body));
+            });
         });
     }
 }

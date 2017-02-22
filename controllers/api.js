@@ -24,5 +24,16 @@ module.exports = function (yelpApi) {
         });
     });
 
+    // Use yelp's business api to find the details of the given business.
+    router.get(`/business/:yelpId`, (req, res) => {
+        yelpApi.businessDetails({ yelpId: req.params.yelpId })
+            .then((response) => {
+                res.send(response);
+            })
+            .catch((err) => {
+                res.status(404).send(err);
+            });
+    });
+
     return router;
 };

@@ -1,4 +1,4 @@
-const xhrRequest = ({ method = `GET`, url }) => new Promise((resolve, reject) => {
+const xhrRequest = ({ method = `GET`, url, data = null }) => new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
     xhr.onload = (event) => {
@@ -13,7 +13,10 @@ const xhrRequest = ({ method = `GET`, url }) => new Promise((resolve, reject) =>
     xhr.onerror = (event) => {
         reject(xhr.statusText);
     };
-    xhr.send(null);
+    if (data !== null) {
+        xhr.setRequestHeader(`Content-Type`, `application/json;charset=UTF-8`);
+    }
+    xhr.send(JSON.stringify(data));
 });
 
 export default xhrRequest;
