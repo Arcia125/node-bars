@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import xhrRequest from '../utils/requests/xhrRequest';
 import storageIsAvailable from '../utils/localstore/storageIsAvailable';
+
+import Hover from './Hover';
 
 const debugEnabled = true;
 
@@ -39,7 +39,7 @@ class LocationSearch extends Component {
                 isError: false,
             },
         });
-        this.props.onSearch(searchLocation)
+        this.props.onSearch(searchLocation, 0)
             .then((response) => {
                 debug(response);
                 this.setState({
@@ -90,21 +90,71 @@ class LocationSearch extends Component {
     }
 
     render() {
+        const formStyle = {
+            transition: `all 0.3s ease`,
+            position: `relative`,
+            right: `6px`,
+            paddingLeft: `15%`,
+            paddingRight: `15%`,
+        };
+
+        const formHoverStyle = {
+            transition: `all 0.3s ease`,
+            filter: `drop-shadow(0px 4px 3px rgba(0, 0, 0, 0.16))`,
+        };
+
+        const inputHeight = `45px`;
+
+        const searchBarShadow = `0px 2px 3px rgba(0, 0, 0, 0.22), 0 0 1px rgba(0, 0, 0, 0.16)`;
+
+        const searchInputStyle = {
+            borderTopRightRadius: `0`,
+            borderBottomRightRadius: `0`,
+            borderTopLeftRadius: `5px`,
+            borderBottomLeftRadius: `5px`,
+            height: inputHeight,
+            boxShadow: searchBarShadow,
+            border: `none`,
+        };
+
+        const searchButtonStyle = {
+            borderBottomLeftRadius: `0`,
+            borderTopLeftRadius: `0`,
+            borderTopRightRadius: `5px`,
+            borderBottomRightRadius: `5px`,
+            height: inputHeight,
+            boxShadow: searchBarShadow,
+        };
+
+        const inputContainerStyle = {
+            padding: `0`,
+        };
+
+        const helperTextStyle = {
+            width: `100%`,
+            marginLeft: `20px`,
+            color: this.state.msg && this.state.msg.msg !== `` ? `` : `transparent`,
+        };
+
+        const helperTextClasses = `text-${this.state.msg && this.state.msg.isError ? `danger` : `info`} pull-left`;
+
         return (
-            <form style={ { position: `relative`, right: `6px` } } onSubmit={ this.handleSubmit } className='row location-search'>
-                <div style={ { paddingRight: `0` } } className='container text-center form-group col-xs-11'>
-                    <input ref={ (elem) => { this.searchInput = elem; } } value={ this.state.query } onChange={ this.handleChange } className='form-control' type='text' name='search'/>
-                </div>
-                <button className='btn btn-primary col-xs-1' type='submit'>
-                    Search
-                </button>
-                <span
-                    style={ { width: '100%', marginLeft: '20px', color: this.state.msg && this.state.msg.msg !== `` ? `` : `transparent` } }
-                    className={ `text-${this.state.msg && this.state.msg.isError ? 'danger' : 'info'} pull-left` }
-                >
-                    { this.state.msg.msg || `No Message` }
-                </span>
-            </form>
+            <Hover style={ formStyle } hoverStyle={ formHoverStyle }>
+                <form onSubmit={ this.handleSubmit } className='row location-search'>
+                    <div style={ inputContainerStyle } className='container text-center col-xs-11'>
+                        <input style={ searchInputStyle } ref={ (elem) => { this.searchInput = elem; } } value={ this.state.query } onChange={ this.handleChange } className='form-control' type='text' name='search' />
+                    </div>
+                    <button style={ searchButtonStyle } className='btn btn-primary col-xs-1' type='submit'>
+                        Search
+                    </button>
+                    <span
+                        style={ helperTextStyle }
+                        className={ helperTextClasses }
+                    >
+                        { this.state.msg.msg || `No Message` }
+                    </span>
+                </form>
+            </Hover>
         );
     }
 }

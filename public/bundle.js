@@ -26356,9 +26356,13 @@
 	
 	var _Bar2 = _interopRequireDefault(_Bar);
 	
-	var _xhrRequest = __webpack_require__(236);
+	var _xhrRequest = __webpack_require__(239);
 	
 	var _xhrRequest2 = _interopRequireDefault(_xhrRequest);
+	
+	var _storageIsAvailable = __webpack_require__(236);
+	
+	var _storageIsAvailable2 = _interopRequireDefault(_storageIsAvailable);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -26380,6 +26384,9 @@
 	            username: null,
 	            locationBars: null
 	        };
+	
+	        _this.storageKey = 'locationSearch';
+	
 	        _this.connect = _this.connect.bind(_this);
 	        _this.handleLocationSearch = _this.handleLocationSearch.bind(_this);
 	        _this.renderBars = _this.renderBars.bind(_this);
@@ -26406,12 +26413,23 @@
 	            });
 	        }
 	    }, {
+	        key: 'getLocationFromStorage',
+	        value: function getLocationFromStorage() {
+	            if ((0, _storageIsAvailable2.default)()) {
+	                return localStorage.getItem(this.storageKey);
+	            } else {
+	                return '';
+	            }
+	        }
+	    }, {
 	        key: 'handleLocationSearch',
 	        value: function handleLocationSearch(location) {
 	            var _this3 = this;
 	
+	            var pageNumber = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	
 	            return new Promise(function (resolve, reject) {
-	                (0, _xhrRequest2.default)({ method: 'GET', url: '/api/v1/search/location/' + encodeURIComponent(location) }).then(function (response) {
+	                (0, _xhrRequest2.default)({ method: 'GET', url: '/api/v1/search/location/' + encodeURIComponent(location ? location : _this3.getLocationFromStorage()) + '/' + pageNumber }).then(function (response) {
 	                    var locationBars = response;
 	                    _this3.setState({
 	                        locationBars: locationBars
@@ -26432,8 +26450,7 @@
 	            var _this4 = this;
 	
 	            if (this.state.locationBars !== null) {
-	                var bars = this.state.locationBars.businesses;
-	                console.log(bars);
+	                var bars = this.state.locationBars;
 	                return bars.map(function (bar, barIndex) {
 	                    return _react2.default.createElement(_Bar2.default, { key: barIndex, bar: bar, delay: barIndex, user: _this4.state.username });
 	                });
@@ -26539,17 +26556,13 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _reactDom = __webpack_require__(87);
-	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-	
-	var _xhrRequest = __webpack_require__(236);
-	
-	var _xhrRequest2 = _interopRequireDefault(_xhrRequest);
-	
-	var _storageIsAvailable = __webpack_require__(237);
+	var _storageIsAvailable = __webpack_require__(236);
 	
 	var _storageIsAvailable2 = _interopRequireDefault(_storageIsAvailable);
+	
+	var _Hover = __webpack_require__(237);
+	
+	var _Hover2 = _interopRequireDefault(_Hover);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -26606,7 +26619,7 @@
 	                    isError: false
 	                }
 	            });
-	            this.props.onSearch(_searchLocation).then(function (response) {
+	            this.props.onSearch(_searchLocation, 0).then(function (response) {
 	                debug(response);
 	                _this2.setState({
 	                    msg: {
@@ -26660,28 +26673,80 @@
 	        value: function render() {
 	            var _this3 = this;
 	
+	            var formStyle = {
+	                transition: 'all 0.3s ease',
+	                position: 'relative',
+	                right: '6px',
+	                paddingLeft: '15%',
+	                paddingRight: '15%'
+	            };
+	
+	            var formHoverStyle = {
+	                transition: 'all 0.3s ease',
+	                filter: 'drop-shadow(0px 4px 3px rgba(0, 0, 0, 0.16))'
+	            };
+	
+	            var inputHeight = '45px';
+	
+	            var searchBarShadow = '0px 2px 3px rgba(0, 0, 0, 0.22), 0 0 1px rgba(0, 0, 0, 0.16)';
+	
+	            var searchInputStyle = {
+	                borderTopRightRadius: '0',
+	                borderBottomRightRadius: '0',
+	                borderTopLeftRadius: '5px',
+	                borderBottomLeftRadius: '5px',
+	                height: inputHeight,
+	                boxShadow: searchBarShadow,
+	                border: 'none'
+	            };
+	
+	            var searchButtonStyle = {
+	                borderBottomLeftRadius: '0',
+	                borderTopLeftRadius: '0',
+	                borderTopRightRadius: '5px',
+	                borderBottomRightRadius: '5px',
+	                height: inputHeight,
+	                boxShadow: searchBarShadow
+	            };
+	
+	            var inputContainerStyle = {
+	                padding: '0'
+	            };
+	
+	            var helperTextStyle = {
+	                width: '100%',
+	                marginLeft: '20px',
+	                color: this.state.msg && this.state.msg.msg !== '' ? '' : 'transparent'
+	            };
+	
+	            var helperTextClasses = 'text-' + (this.state.msg && this.state.msg.isError ? 'danger' : 'info') + ' pull-left';
+	
 	            return _react2.default.createElement(
-	                'form',
-	                { style: { position: 'relative', right: '6px' }, onSubmit: this.handleSubmit, className: 'row location-search' },
+	                _Hover2.default,
+	                { style: formStyle, hoverStyle: formHoverStyle },
 	                _react2.default.createElement(
-	                    'div',
-	                    { style: { paddingRight: '0' }, className: 'container text-center form-group col-xs-11' },
-	                    _react2.default.createElement('input', { ref: function ref(elem) {
-	                            _this3.searchInput = elem;
-	                        }, value: this.state.query, onChange: this.handleChange, className: 'form-control', type: 'text', name: 'search' })
-	                ),
-	                _react2.default.createElement(
-	                    'button',
-	                    { className: 'btn btn-primary col-xs-1', type: 'submit' },
-	                    'Search'
-	                ),
-	                _react2.default.createElement(
-	                    'span',
-	                    {
-	                        style: { width: '100%', marginLeft: '20px', color: this.state.msg && this.state.msg.msg !== '' ? '' : 'transparent' },
-	                        className: 'text-' + (this.state.msg && this.state.msg.isError ? 'danger' : 'info') + ' pull-left'
-	                    },
-	                    this.state.msg.msg || 'No Message'
+	                    'form',
+	                    { onSubmit: this.handleSubmit, className: 'row location-search' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { style: inputContainerStyle, className: 'container text-center col-xs-11' },
+	                        _react2.default.createElement('input', { style: searchInputStyle, ref: function ref(elem) {
+	                                _this3.searchInput = elem;
+	                            }, value: this.state.query, onChange: this.handleChange, className: 'form-control', type: 'text', name: 'search' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'button',
+	                        { style: searchButtonStyle, className: 'btn btn-primary col-xs-1', type: 'submit' },
+	                        'Search'
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        {
+	                            style: helperTextStyle,
+	                            className: helperTextClasses
+	                        },
+	                        this.state.msg.msg || 'No Message'
+	                    )
 	                )
 	            );
 	        }
@@ -26694,45 +26759,6 @@
 
 /***/ },
 /* 236 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	var xhrRequest = function xhrRequest(_ref) {
-	    var _ref$method = _ref.method,
-	        method = _ref$method === undefined ? "GET" : _ref$method,
-	        url = _ref.url,
-	        _ref$data = _ref.data,
-	        data = _ref$data === undefined ? null : _ref$data;
-	    return new Promise(function (resolve, reject) {
-	        var xhr = new XMLHttpRequest();
-	        xhr.open(method, url, true);
-	        xhr.onload = function (event) {
-	            if (xhr.readyState === 4) {
-	                if (xhr.status === 200) {
-	                    resolve(JSON.parse(xhr.response));
-	                } else {
-	                    reject(xhr.statusText);
-	                }
-	            }
-	        };
-	        xhr.onerror = function (event) {
-	            reject(xhr.statusText);
-	        };
-	        if (data !== null) {
-	            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	        }
-	        xhr.send(JSON.stringify(data));
-	    });
-	};
-	
-	exports.default = xhrRequest;
-
-/***/ },
-/* 237 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -26762,173 +26788,7 @@
 	exports.default = storageIsAvailable;
 
 /***/ },
-/* 238 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _react = __webpack_require__(1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _xhrRequest = __webpack_require__(236);
-	
-	var _xhrRequest2 = _interopRequireDefault(_xhrRequest);
-	
-	var _Hover = __webpack_require__(239);
-	
-	var _Hover2 = _interopRequireDefault(_Hover);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var Bar = function Bar(props) {
-	    var bar = props.bar;
-	
-	    var handleGoing = function handleGoing(event) {
-	        event.preventDefault();
-	        if (props.user) {
-	            (0, _xhrRequest2.default)({ method: 'POST', url: '/bars/go', data: { bar: bar.id } }).then(function (response) {
-	                console.log(response);
-	            }).catch(function (err) {
-	                console.log(err);
-	            });
-	        } else {
-	            window.location = '/auth/twitter';
-	        }
-	    };
-	
-	    var textWhite = '#F3F3F3';
-	    var barHeight = '175px';
-	    var textShadow = {
-	        color: textWhite,
-	        textShadow: '-1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 1px #000',
-	        WebkitFontSmoothing: 'antialiased'
-	    };
-	
-	    var contentStyle = {
-	        display: 'flex',
-	        flexDirection: 'column',
-	        height: '100%'
-	    };
-	
-	    var barStyle = Object.assign({}, {
-	        backgroundImage: 'url(' + bar.image_url + ')',
-	        backgroundSize: 'cover',
-	        padding: '5px 10px',
-	        boxShadow: '1px 1px 5px #999',
-	        marginTop: '8px',
-	        marginBottom: '8px',
-	        height: barHeight,
-	        transition: 'all 0.4s ease-out',
-	        backgroundPosition: 'center 0px',
-	        position: 'relative',
-	        width: '100%'
-	    }, textShadow);
-	
-	    var imageHoverStyle = {
-	        filter: 'saturate(1.3) brightness(1.2)',
-	        transition: 'all 0.4s ease-out',
-	        zIndex: '1000',
-	        boxShadow: '',
-	        height: barHeight.slice(0, -2) * 1.5 + 'px',
-	        backgroundPosition: 'center center'
-	    };
-	
-	    var businessNameStyle = Object.assign({}, {
-	        fontSize: '30px',
-	        fontWeight: 'bold'
-	    }, textShadow);
-	
-	    var businessAddressStyle = Object.assign({}, {}, textShadow);
-	
-	    var attendButtonStyle = Object.assign({}, {
-	        background: 'rgba(0, 0, 0, .7)',
-	        transition: 'all 0.3s ease',
-	        transform: 'translate(0, -50%)'
-	    }, textShadow);
-	
-	    var attendButtonHover = {
-	        background: textWhite,
-	        color: '#000',
-	        textShadow: '',
-	        border: '1px solid #0A0A0A',
-	        transition: 'all 0.3s ease'
-	    };
-	
-	    var attendContainerStyle = {
-	        position: 'absolute',
-	        top: '50%',
-	        bottom: '50%',
-	        right: '1%'
-	    };
-	
-	    var footerStyle = {
-	        position: 'absolute',
-	        bottom: '1%',
-	        transition: 'all 0.3s ease'
-	    };
-	
-	    var footerHover = {
-	        transition: 'all 0.3s ease',
-	        filter: 'drop-shadow(1px 1px 2px black) saturate(4)'
-	    };
-	
-	    var ratingsStyle = {
-	        width: '175px'
-	    };
-	
-	    return _react2.default.createElement(
-	        _Hover2.default,
-	        { style: barStyle, hoverStyle: imageHoverStyle },
-	        _react2.default.createElement(
-	            'div',
-	            null,
-	            _react2.default.createElement(
-	                'div',
-	                { style: contentStyle },
-	                _react2.default.createElement(
-	                    'a',
-	                    { target: '_blank', style: businessNameStyle, href: bar.url },
-	                    bar.name || ''
-	                ),
-	                _react2.default.createElement(
-	                    'p',
-	                    { style: businessAddressStyle },
-	                    ' ',
-	                    bar.location.display_address[0] || bar.location.address1 || bar.location.address2
-	                ),
-	                _react2.default.createElement(
-	                    _Hover2.default,
-	                    { containerStyle: attendContainerStyle, style: attendButtonStyle, hoverStyle: attendButtonHover },
-	                    _react2.default.createElement(
-	                        'button',
-	                        { onClick: handleGoing, className: 'btn btn-lg' },
-	                        0 + ' Going'
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    _Hover2.default,
-	                    { style: footerStyle, hoverStyle: footerHover },
-	                    _react2.default.createElement(
-	                        'a',
-	                        { href: 'https://www.yelp.com/', target: '_blank' },
-	                        _react2.default.createElement('img', { style: ratingsStyle, alt: 'yelp stars', src: '/stars/' + bar.rating.toString().replace('.', '_') + '.png' }),
-	                        _react2.default.createElement('img', { alt: 'yelp logo', src: 'Yelp_trademark_RGB.png' })
-	                    )
-	                )
-	            )
-	        )
-	    );
-	};
-	
-	exports.default = Bar;
-
-/***/ },
-/* 239 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27011,6 +26871,256 @@
 	}(_react.Component);
 	
 	exports.default = Hover;
+
+/***/ },
+/* 238 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _xhrRequest = __webpack_require__(239);
+	
+	var _xhrRequest2 = _interopRequireDefault(_xhrRequest);
+	
+	var _Hover = __webpack_require__(237);
+	
+	var _Hover2 = _interopRequireDefault(_Hover);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Bar = function (_Component) {
+	    _inherits(Bar, _Component);
+	
+	    function Bar(props) {
+	        _classCallCheck(this, Bar);
+	
+	        var _this = _possibleConstructorReturn(this, (Bar.__proto__ || Object.getPrototypeOf(Bar)).call(this, props));
+	
+	        _this.state = {
+	            going: props.bar.going,
+	            userIsGoing: props.bar.userIsGoing
+	        };
+	        _this.handleGoing = _this.handleGoing.bind(_this);
+	        return _this;
+	    }
+	
+	    _createClass(Bar, [{
+	        key: 'handleGoing',
+	        value: function handleGoing(event) {
+	            var _this2 = this;
+	
+	            event.preventDefault();
+	            var bar = this.props.bar;
+	            if (this.props.user) {
+	                (0, _xhrRequest2.default)({ method: 'POST', url: '/bars/go', data: { bar: bar.id } }).then(function (response) {
+	                    if (response.err) {
+	                        console.log(response.err);
+	                        return;
+	                    }
+	                    _this2.setState({
+	                        going: response.count,
+	                        userIsGoing: response.result === 'added'
+	                    });
+	                }).catch(function (err) {
+	                    console.log(err);
+	                });
+	            } else {
+	                window.location = '/auth/twitter';
+	            }
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var bar = this.props.bar;
+	
+	            var textWhite = '#F3F3F3';
+	            var barHeight = '175px';
+	            var textShadow = {
+	                color: textWhite,
+	                textShadow: '-1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 1px #000',
+	                WebkitFontSmoothing: 'antialiased'
+	            };
+	
+	            var contentStyle = {
+	                display: 'flex',
+	                flexDirection: 'column',
+	                height: '100%'
+	            };
+	
+	            var barStyle = Object.assign({}, {
+	                backgroundImage: 'url(' + bar.image_url + ')',
+	                backgroundSize: 'cover',
+	                padding: '5px 10px',
+	                boxShadow: '1px 1px 5px #999',
+	                marginTop: '8px',
+	                marginBottom: '8px',
+	                height: barHeight,
+	                transition: 'all 0.4s ease-out',
+	                backgroundPosition: 'center 0px',
+	                position: 'relative',
+	                width: '100%'
+	            }, textShadow);
+	
+	            var imageHoverStyle = {
+	                filter: 'saturate(1.3) brightness(1.2)',
+	                transition: 'all 0.4s ease-out',
+	                zIndex: '1000',
+	                boxShadow: '',
+	                height: barHeight.slice(0, -2) * 1.5 + 'px',
+	                backgroundPosition: 'center center'
+	            };
+	
+	            var businessNameStyle = Object.assign({}, {
+	                fontSize: '30px',
+	                fontWeight: 'bold'
+	            }, textShadow);
+	
+	            var businessAddressStyle = Object.assign({}, {}, textShadow);
+	
+	            var attendButtonStyle = Object.assign({}, {
+	                background: 'rgba(0, 0, 0, .7)',
+	                transition: 'all 0.3s ease',
+	                transform: 'translate(0, -50%)'
+	            }, textShadow);
+	
+	            var attendButtonHover = {
+	                background: textWhite,
+	                color: '#000',
+	                textShadow: '',
+	                border: '1px solid #0A0A0A',
+	                transition: 'all 0.3s ease'
+	            };
+	
+	            var attendContainerStyle = {
+	                position: 'absolute',
+	                top: '50%',
+	                bottom: '50%',
+	                right: '1%'
+	            };
+	
+	            var footerStyle = {
+	                position: 'absolute',
+	                bottom: '1%',
+	                transition: 'all 0.3s ease'
+	            };
+	
+	            var footerHover = {
+	                transition: 'all 0.3s ease',
+	                filter: 'drop-shadow(1px 1px 2px black) saturate(4)'
+	            };
+	
+	            var ratingsStyle = {
+	                width: '175px'
+	            };
+	
+	            return _react2.default.createElement(
+	                _Hover2.default,
+	                { style: barStyle, hoverStyle: imageHoverStyle },
+	                _react2.default.createElement(
+	                    'div',
+	                    null,
+	                    _react2.default.createElement(
+	                        'div',
+	                        { style: contentStyle },
+	                        _react2.default.createElement(
+	                            'a',
+	                            { rel: 'noreferrer noopener', target: '_blank', style: businessNameStyle, href: bar.url },
+	                            bar.name || ''
+	                        ),
+	                        _react2.default.createElement(
+	                            'p',
+	                            { style: businessAddressStyle },
+	                            bar.location.display_address[0] || bar.location.address1 || bar.location.address2
+	                        ),
+	                        this.state.userIsGoing ? _react2.default.createElement(
+	                            'p',
+	                            { style: businessAddressStyle },
+	                            'You are going'
+	                        ) : null,
+	                        _react2.default.createElement(
+	                            _Hover2.default,
+	                            { containerStyle: attendContainerStyle, style: attendButtonStyle, hoverStyle: attendButtonHover },
+	                            _react2.default.createElement(
+	                                'button',
+	                                { onClick: this.handleGoing, className: 'btn btn-lg' },
+	                                this.state.going + ' Going ' + (this.props.user ? '' : '(login)')
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            _Hover2.default,
+	                            { style: footerStyle, hoverStyle: footerHover },
+	                            _react2.default.createElement(
+	                                'a',
+	                                { rel: 'noreferrer noopener', href: 'https://www.yelp.com/', target: '_blank' },
+	                                _react2.default.createElement('img', { style: ratingsStyle, alt: 'yelp stars', src: '/stars/' + bar.rating.toString().replace('.', '_') + '.png' }),
+	                                _react2.default.createElement('img', { alt: 'yelp logo', src: 'Yelp_trademark_RGB.png' })
+	                            )
+	                        )
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+	
+	    return Bar;
+	}(_react.Component);
+	
+	exports.default = Bar;
+
+/***/ },
+/* 239 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var xhrRequest = function xhrRequest(_ref) {
+	    var _ref$method = _ref.method,
+	        method = _ref$method === undefined ? "GET" : _ref$method,
+	        url = _ref.url,
+	        _ref$data = _ref.data,
+	        data = _ref$data === undefined ? null : _ref$data;
+	    return new Promise(function (resolve, reject) {
+	        var xhr = new XMLHttpRequest();
+	        xhr.open(method, url, true);
+	        xhr.onload = function (event) {
+	            if (xhr.readyState === 4) {
+	                if (xhr.status === 200) {
+	                    resolve(JSON.parse(xhr.response));
+	                } else {
+	                    reject(xhr.statusText);
+	                }
+	            }
+	        };
+	        xhr.onerror = function (event) {
+	            reject(xhr.statusText);
+	        };
+	        if (data !== null) {
+	            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	        }
+	        xhr.send(JSON.stringify(data));
+	    });
+	};
+	
+	exports.default = xhrRequest;
 
 /***/ },
 /* 240 */

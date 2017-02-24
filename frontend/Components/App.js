@@ -5,6 +5,7 @@ import LocationSearch from './LocationSearch';
 import Bar from './Bar';
 
 import xhrRequest from '../utils/requests/xhrRequest';
+import storageIsAvailable from '../utils/localstore/storageIsAvailable';
 
 class App extends Component {
     constructor(props) {
@@ -13,6 +14,9 @@ class App extends Component {
             username: null,
             locationBars: null,
         };
+
+        this.storageKey = `locationSearch`;
+
         this.connect = this.connect.bind(this);
         this.handleLocationSearch = this.handleLocationSearch.bind(this);
         this.renderBars = this.renderBars.bind(this);
@@ -35,30 +39,37 @@ class App extends Component {
             });
     }
 
-    handleLocationSearch(location) {
+    getLocationFromStorage() {
+        if (storageIsAvailable()) {
+            return localStorage.getItem(this.storageKey);
+        } else {
+            return ``;
+        }
+    }
+
+    handleLocationSearch(location, pageNumber = 0) {
         return new Promise((resolve, reject) => {
-            xhrRequest({ method: `GET`, url: `/api/v1/search/location/${encodeURIComponent(location)}` })
-            .then((response) => {
-                const locationBars = response;
-                this.setState({
-                    locationBars,
+            xhrRequest({ method: `GET`, url: `/api/v1/search/location/${encodeURIComponent(location ? location : this.getLocationFromStorage())}/${pageNumber}` })
+                .then((response) => {
+                    const locationBars = response;
+                    this.setState({
+                        locationBars,
+                    });
+                    resolve(response);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    reject(err);
+                    this.setState({
+                        locationBars: null,
+                    });
                 });
-                resolve(response);
-            })
-            .catch((err) => {
-                console.error(err);
-                reject(err);
-                this.setState({
-                    locationBars: null,
-                });
-            });
         });
     }
 
     renderBars() {
         if (this.state.locationBars !== null) {
-            const bars = this.state.locationBars.businesses;
-            console.log(bars);
+            const bars = this.state.locationBars;
             return bars.map((bar, barIndex) => <Bar key={ barIndex } bar={ bar } delay={ barIndex } user={ this.state.username } />);
         }
         return null;

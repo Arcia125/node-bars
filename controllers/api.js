@@ -2,6 +2,7 @@
 
 const express = require(`express`);
 const router = express.Router();
+const db = require(`../db`);
 
 module.exports = function (yelpApi) {
     // Use yelp's search api with the same string parameters.
@@ -13,14 +14,41 @@ module.exports = function (yelpApi) {
     });
 
     // Use yelp's search api to find bars at the given location.
-    router.get(`/search/location/:location`, (req, res) => {
+    router.get(`/search/location/:location/:offset`, (req, res) => {
         const location = req.params.location;
-        yelpApi.search({ location, categories: `bars` }, (body) => {
+        const offset = req.params.offset;
+        yelpApi.search({ location, categories: `bars`, offset }, (body) => {
             if (body.error) {
                 res.status(404).send(body.error);
                 return;
             }
-            res.send(body);
+            const barsCollection = db.get().collection(`bars`);
+            let bars = [];
+            const barCount = body.businesses.length;
+            body.businesses.forEach((bar, barIndex) => {
+                barsCollection.findOne({ barId: bar.id })
+                    .then((barObj) => {
+                        if (barObj) {
+                            if (req.user && barObj.going.indexOf(req.user.twitterUsername) !== -1) {
+                                bar.userIsGoing = true;
+                            } else {
+                                bar.userIsGoing = false;
+                            }
+                            bar.going = barObj.going.length;
+                        } else {
+                            bar.userIsGoing = false;
+                            bar.going = 0;
+                        }
+                        bars.push(bar);
+                        if (barIndex + 1 >= barCount) {
+                            res.send(bars);
+                        }
+                    })
+                    .catch((findErr) => {
+                        console.log(findErr);
+                    });
+            });
+            // res.send(body);
         });
     });
 
